@@ -14,11 +14,32 @@ require('dotenv/config');
 
 const api = process.env.API_URL;
 
+const productsRouter = require('./routers/products');
+const categoriesRouter = require('./routers/categories');
+const orderItemsRouter = require('./routers/orderItems');
+const ordersRouter = require('./routers/orders');
+const usersRouter = require('./routers/users');
+
 //Middleware
 app.use(express.json());
 app.use(morgan('tiny'));
 
+//routers folder
+app.use(`${api}/products`, productsRouter);
+app.use(`${api}/categories`, categoriesRouter);
+app.use(`${api}/orderItems`, orderItemsRouter);
+app.use(`${api}/orders`, ordersRouter);
+app.use(`${api}/users`, usersRouter);
+
+
 app.use(bodyParser.urlencoded({ extended: true }));
+
+//models folder
+const Product = require('./models/products');
+const Order = require('./models/orders');
+const OrderItem = require('./models/orderItems');
+const User = require('./models/users');
+const Category = require('./models/categories');
 
 //MongoDb connect
 mongoose.connect(process.env.MONGO_CONNECT, { 
@@ -31,22 +52,7 @@ mongoose.connect(process.env.MONGO_CONNECT, {
     console.log(err);
 });
 
-// http://localhost:3001/api/v1/products
-app.get(`${api}/products`, function (req, res) {
-    const product = {
-        id: 1,
-        name: 'green velvet sofa',
-        image: 'some_url'
-    }
-    res.send(product);
-});
-
-app.post(`${api}/products`, function (req, res) {
-    const newProduct = req.body;
-    console.log(newProduct);
-    res.send(newProduct);
-});
-
+//server
 app.listen(3001, function () {
     console.log(`Server has started on port ${port}`)
 });
