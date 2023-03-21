@@ -1,4 +1,4 @@
-const OrderItem = require('../models/orderItems');
+const {OrderItem} = require('../models/orderItems');
 const express = require('express');
 const router = express.Router();
 
