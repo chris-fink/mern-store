@@ -1,5 +1,6 @@
 //jshint esversion: 6
 
+require('dotenv/config');
 const express = require('express');
 const https = require('https');
 const port = 3001;
@@ -7,10 +8,12 @@ const app = express();
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
+const session = require('express-session');
+const passport = require('passport');
 //Sets StrictQuery to false
 mongoose.set('strictQuery', false);
 
-require('dotenv/config');
+
 
 const api = process.env.API_URL;
 
@@ -34,6 +37,17 @@ app.use(`${api}/users`, usersRouter);
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
+//Session
+app.use(session({
+    secret: "Our little secret.",
+    resave: false,
+    saveUninitialized: false
+}));
+
+//passport
+app.use(passport.initialize());
+app.use(passport.session());
+
 //models folder
 const Product = require('./models/products');
 const Order = require('./models/orders');
@@ -51,6 +65,7 @@ mongoose.connect(process.env.MONGO_CONNECT, {
 .catch((err)=>{
     console.log(err);
 });
+
 
 //server
 app.listen(3001, function () {
