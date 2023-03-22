@@ -10,10 +10,13 @@ const morgan = require('morgan');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const passport = require('passport');
+const cors = require('cors');
 //Sets StrictQuery to false
 mongoose.set('strictQuery', false);
 
-
+//CORS
+app.use(cors());
+app.options('*', cors());
 
 const api = process.env.API_URL;
 

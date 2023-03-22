@@ -10,17 +10,26 @@ const findOrCreate = require('mongoose-findorcreate');
 const api = process.env.API_URL;
 
 router.get(`/`, async (req, res) => {
-    const userList = await User.find();
+    const user = await User.find();
 
-    if(!userList) {
+    if(!user) {
         res.status(500).json({success:false})
     }
-    res.send(userList);
+    res.send(user);
+});
+
+router.get('/', async(req,res)=>{
+    const user = await User.findById(req.params.id);
+
+    if(!user) {
+        res.status(500).json({message: 'The user with the given ID was not reached.'});
+    }
+    res.status(200).send(user);
 });
 
 // http://localhost:3001/api/v1/users
-router.post(`/`, function (req, res) {
-    const user = new User({
+router.post(`/`, async(req, res)=>{
+    let user = new User({
         id: req.body.id,
         name: req.body.name,
         email: req.body.email,
@@ -35,14 +44,10 @@ router.post(`/`, function (req, res) {
         googleId: req.body.googleId,
         secret: req.body.secret
     });
-    user.save().then((createdUser => {
-        res.status(201).json(createdUser)
-    })).catch((err)=>{
-        res.status(500).json({
-            error: err,
-            success: false
-        });
-    });
+    user = await user.save();
+    if(!user)
+        return res.status(500).send('The user cannot be created.')
+    res.send(user);
 });
 
 passport.use(User.createStrategy());
@@ -69,5 +74,43 @@ passport.use(new GoogleStrategy({
         });
     }
 ));
+
+router.put('/:id', async(req, res)=> {
+    const user = await User.findByIdAndUpdate(
+        {
+            id: req.body.id,
+            name: req.body.name,
+            email: req.body.email,
+            passwordHash: req.body.passwordHash,
+            street: req.body.street,
+            apartment: req.body.apartment,
+            city: req.body.city,
+            zip: req.body.zip,
+            country: req.body.country,
+            phone: req.body.phone,
+            isAdmin: req.body.isAdmin,
+            googleId: req.body.googleId,
+            secret: req.body.secret
+        },
+        { new: true }
+    )
+    if (!product)
+        return res.status(400).send('The user item cannot be created!');
+
+    res.status(200).send(user);
+});
+
+// api/v1/id
+router.delete('/:id', (req, res) => {
+    User.findByIdAndRemove(req.params.id).then(user => {
+        if (user) {
+            return res.status(200).json({ success: true, message: 'This user has been deleted!' });
+        } else {
+            return res.status(404).json({ success: false, message: 'This user was not found.' });
+        }
+    }).catch(err => {
+        return res.status(400).json({ success: false, error: err });
+    });
+});
 
 module.exports = router;

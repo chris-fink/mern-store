@@ -4,16 +4,40 @@ const findOrCreate = require('mongoose-findorcreate');
 
 const usersSchema = mongoose.Schema({
     id: String,
-    name: String,
-    email: String,
+    name: {
+        type: String,
+        required: true
+    },
+    email: {
+        type: String,
+        required: true
+    },
     passwordHash: String,
-    street: String,
+    street: {
+        type: String,
+        required: true
+    },
     apartment: String,
-    city: String,
-    zip: String,
-    country: String,
-    phone: Number,
-    isAdmin: Boolean,
+    city: {
+        type: String,
+        required: true
+    },
+    zip: {
+        type: Number,
+        required: true
+    },
+    country: {
+        type: String,
+        required: true
+    },
+    phone: {
+        type: Number,
+        required: true
+    },
+    isAdmin: {
+        type: Boolean,
+        default: false
+    },
     googleId: String,
     secret: String
 });

@@ -13,20 +13,53 @@ router.get(`$/`, async (req, res) => {
     res.send(orderItemList);
 });
 
+router.get('/', async(req,res)=>{
+    const orderItem = await OrderItem.findById(req.params.id);
+
+    if(!orderItem) {
+        res.status(500).json({message: 'Te order item with the given ID was not reached.'});
+    }
+    res.status(200).send(orderItem);
+});
+
 // http://localhost:3001/api/v1/orderItems
-router.post(`/`, function (req, res) {
-    const orderItem = new OrderItem({
+router.post(`/`, async(req, res)=>{
+    let orderItem = new OrderItem({
         id: req.body.id,
         product: req.body.product,
         quantity: req.body.quantity,
     });
-    orderItem.save().then((createdOrderItem => {
-        res.status(201).json(createdOrderItem)
-    })).catch((err)=>{
-        res.status(500).json({
-            error: err,
-            success: false
-        });
+    orderItem = await orderItem.save();
+    if(!orderItem)
+        return res.status(500).send('The order item cannot be created.')
+    res.send(orderItem);
+});
+
+router.put('/:id', async(req, res)=> {
+    const orderItem = await OrderItem.findByIdAndUpdate(
+        {
+            id: req.body.id,
+            product: req.body.product,
+            quantity: req.body.quantity,
+        },
+        { new: true }
+    )
+    if (!orderItem)
+        return res.status(400).send('The order item cannot be created!');
+
+    res.status(200).send(orderItem);
+});
+
+// api/v1/id
+router.delete('/:id', (req, res) => {
+    OrderItem.findByIdAndRemove(req.params.id).then(orderItem => {
+        if (orderItem) {
+            return res.status(200).json({ success: true, message: 'This item has been deleted from the order' });
+        } else {
+            return res.status(404).json({ success: false, message: 'This item was not found in the order.' });
+        }
+    }).catch(err => {
+        return res.status(400).json({ success: false, error: err });
     });
 });
 
