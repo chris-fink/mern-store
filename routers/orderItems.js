@@ -1,11 +1,13 @@
 const {OrderItem} = require('../models/orderItems');
 const express = require('express');
+const {product} = require('../models/products');
+
 const router = express.Router();
 
 const api = process.env.API_URL;
 
-router.get(`$/`, async (req, res) => {
-    const orderItemList = await OrderItem.find();
+router.get(`/`, async (req, res) => {
+    const orderItemList = await OrderItem.find().populate('product');
 
     if(!orderItemList) {
         res.status(500).json({success:false})
@@ -13,8 +15,8 @@ router.get(`$/`, async (req, res) => {
     res.send(orderItemList);
 });
 
-router.get('/', async(req,res)=>{
-    const orderItem = await OrderItem.findById(req.params.id);
+router.get(':/id', async(req,res)=>{
+    const orderItem = await OrderItem.findById(req.params.id).populate('product');
 
     if(!orderItem) {
         res.status(500).json({message: 'Te order item with the given ID was not reached.'});

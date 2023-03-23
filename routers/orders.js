@@ -1,11 +1,13 @@
 const {Order} = require('../models/orders');
 const express = require('express');
+const {OrderItem} = require('../models/orderItems');
+const {User} = require('../models/users');
 const router = express.Router();
 
 const api = process.env.API_URL;
 
 router.get(`/`, async (req, res) => {
-    const order = await Order.find();
+    const order = await Order.find().populate('category');
 
     if(!order) {
         res.status(500).json({success:false})
@@ -13,8 +15,8 @@ router.get(`/`, async (req, res) => {
     res.send(order);
 });
 
-router.get('/', async(req,res)=>{
-    const order = await Order.findById(req.params.id);
+router.get('/:/id', async(req,res)=>{
+    const order = await Order.findById(req.params.id).populate('orderItem', 'user');
 
     if(!order) {
         res.status(500).json({message: 'The order with the given ID was not reached.'});

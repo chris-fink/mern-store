@@ -1,11 +1,12 @@
-const {Product} = require('../models/products');
+const { Product } = require('../models/products');
 const express = require('express');
+const { Category } = require('../models/categories');
 const router = express.Router();
 
 const api = process.env.API_URL;
 
 router.get(`/`, async (req, res) => {
-    const productList = await Product.find();
+    const productList = await Product.find().populate('category');
 
     if(!productList) {
         res.status(500).json({success:false})
@@ -13,11 +14,11 @@ router.get(`/`, async (req, res) => {
     res.send(productList);
 });
 
-router.get('/', async(req,res)=>{
-    const product = await Product.findById(req.params.id);
+router.get(':/id', async(req,res)=>{
+    const product = await Product.findById(req.params.id).populate('category');
 
     if(!product) {
-        res.status(500).json({message: 'The product with the given ID was not reached.'});
+        res.status(500).json({ success: false, message: 'The product with the given ID was not reached.' });
     }
     res.status(200).send(product);
 });
@@ -27,7 +28,7 @@ router.post(`/`, async(req, res)=> {
     const category = await Category.findById(req.body.category);
     if(!category) return res.status(400).send('Invalid Category');
 
-    let product = new Product({
+    const product = new Product({
         image: req.body.image,
         category: req.body.category,
         name: req.body.name,
