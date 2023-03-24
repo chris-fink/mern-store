@@ -2,8 +2,7 @@ const mongoose = require('mongoose');
 const passportLocalMongoose = require('passport-local-mongoose');
 const findOrCreate = require('mongoose-findorcreate');
 
-const usersSchema = mongoose.Schema({
-    id: String,
+const userSchema = mongoose.Schema({
     name: {
         type: String,
         required: true
@@ -19,6 +18,10 @@ const usersSchema = mongoose.Schema({
     },
     apartment: String,
     city: {
+        type: String,
+        required: true
+    },
+    state: {
         type: String,
         required: true
     },
@@ -42,8 +45,17 @@ const usersSchema = mongoose.Schema({
     secret: String
 });
 
-//userSchema PLUGIN
-usersSchema.plugin(passportLocalMongoose);
-usersSchema.plugin(findOrCreate);
+userSchema.virtual('id').get(function () {
+    return this._id.toHexString();
+});
 
-exports.User = mongoose.model('User', usersSchema);
+userSchema.set('toJSON', {
+    virtuals: true,
+});
+
+//userSchema PLUGIN
+userSchema.plugin(passportLocalMongoose);
+userSchema.plugin(findOrCreate);
+
+exports.User = mongoose.model('User', userSchema);
+exports.userSchema = userSchema;

@@ -6,16 +6,18 @@ const passport = require('passport');
 const passportLocalMongoose = require('passport-local-mongoose');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const findOrCreate = require('mongoose-findorcreate');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const api = process.env.API_URL;
 
 router.get(`/`, async (req, res) => {
-    const user = await User.find();
+    const userList = await User.find();
 
-    if(!user) {
+    if(!userList) {
         res.status(500).json({success:false})
     }
-    res.send(user);
+    res.send(userList);
 });
 
 router.get(':/id', async(req,res)=>{
@@ -29,14 +31,16 @@ router.get(':/id', async(req,res)=>{
 
 // http://localhost:3001/api/v1/users
 router.post(`/`, async(req, res)=>{
+    let salt = process.send.SALT;
     let user = new User({
         id: req.body.id,
         name: req.body.name,
         email: req.body.email,
-        passwordHash: req.body.passwordHash,
+        passwordHash: bcrypt.hashSync(req.body.password, salt),
         street: req.body.street,
         apartment: req.body.apartment,
         city: req.body.city,
+        state: req.body.state,
         zip: req.body.zip,
         country: req.body.country,
         phone: req.body.phone,
@@ -85,6 +89,7 @@ router.put('/:id', async(req, res)=> {
             street: req.body.street,
             apartment: req.body.apartment,
             city: req.body.city,
+            state: req.body.state,
             zip: req.body.zip,
             country: req.body.country,
             phone: req.body.phone,
@@ -94,11 +99,36 @@ router.put('/:id', async(req, res)=> {
         },
         { new: true }
     )
-    if (!product)
+    if (!user)
         return res.status(400).send('The user item cannot be created!');
 
     res.status(200).send(user);
 });
+
+router.post('/login', async (req,res)=>{
+    const user = await User.findOne({email: req.body.email});
+    const key = process.env.PRIVATEKEY
+
+    if(!user) {
+        return res.status(400).send('This user was not found.');
+    }
+
+    if(user && bcrypt.compareSync(req.body.password, user.passwordHash)) {
+        const token =jwt.sign(
+            {
+                userId: user.id
+            },
+            key,
+            {expiresIn : '1d'}
+        );
+
+        res.status(200).send({user: user.email , token: token});
+    } else {
+        res.status(400).send('Username and password do not match. Please try again.');
+    }
+
+    return res.status(200).send(user);
+})
 
 // api/v1/id
 router.delete('/:id', (req, res) => {

@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 
 const ordersSchema = mongoose.Schema({
-    id: String,
     orderItems: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'OrderItem',
@@ -46,6 +45,14 @@ const ordersSchema = mongoose.Schema({
         required: true
     },
     dateOrdered: Date
+});
+
+ordersSchema.virtual('id').get(function () {
+    return this._id.toHexString();
+});
+
+ordersSchema.set('toJSON', {
+    virtuals: true,
 });
 
 exports.Order = mongoose.model('Order', ordersSchema);
