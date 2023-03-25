@@ -11,6 +11,7 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const passport = require('passport');
 const cors = require('cors');
+const authJwt = require("./helpers/jwt");
 //Sets StrictQuery to false
 mongoose.set('strictQuery', false);
 
@@ -29,6 +30,7 @@ const usersRouter = require('./routers/users');
 //Middleware
 app.use(express.json());
 app.use(morgan('tiny'));
+app.use(authJwt);
 
 //routers folder
 app.use(`${api}/products`, productsRouter);
