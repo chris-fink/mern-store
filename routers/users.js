@@ -54,6 +54,31 @@ router.post(`/`, async(req, res)=>{
     res.send(user);
 });
 
+// http://localhost:3001/api/v1/users/register
+router.post(`/register`, async(req, res)=>{
+    let salt = process.send.SALT;
+    let user = new User({
+        id: req.body.id,
+        name: req.body.name,
+        email: req.body.email,
+        passwordHash: bcrypt.hashSync(req.body.password, salt),
+        street: req.body.street,
+        apartment: req.body.apartment,
+        city: req.body.city,
+        state: req.body.state,
+        zip: req.body.zip,
+        country: req.body.country,
+        phone: req.body.phone,
+        isAdmin: req.body.isAdmin,
+        googleId: req.body.googleId,
+        secret: req.body.secret
+    });
+    user = await user.save();
+    if(!user)
+        return res.status(500).send('The user cannot be created.')
+    res.send(user);
+});
+
 passport.use(User.createStrategy());
 
 passport.serializeUser(function (user, done) {
