@@ -12,6 +12,7 @@ const session = require('express-session');
 const passport = require('passport');
 const cors = require('cors');
 const authJwt = require("./helpers/jwt");
+const errorHandler = require('./helpers/error-handler');
 //Sets StrictQuery to false
 mongoose.set('strictQuery', false);
 
@@ -30,7 +31,8 @@ const usersRouter = require('./routers/users');
 //Middleware
 app.use(express.json());
 app.use(morgan('tiny'));
-app.use(authJwt);
+app.use(authJwt());//use Bearer Token 
+app.use(errorHandler);
 
 //routers folder
 app.use(`${api}/products`, productsRouter);
@@ -59,6 +61,7 @@ const Order = require('./models/orders');
 const OrderItem = require('./models/orderItems');
 const User = require('./models/users');
 const Category = require('./models/categories');
+
 
 //MongoDb connect
 mongoose.connect(process.env.MONGO_CONNECT, { 
